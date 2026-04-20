@@ -30,6 +30,10 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { Chatbot } from './components/Chatbot';
+import { FAQ } from './components/FAQ';
+import { Testimonials } from './components/Testimonials';
+import { cars as carFleet } from './data';
 
 type Language = 'AZ' | 'EN' | 'RU' | 'عربي';
 
@@ -224,6 +228,7 @@ export default function App() {
   const [scrolled, setScrolled] = useState(false);
   const [selectedCar, setSelectedCar] = useState<any>(null);
   const [bookingSuccess, setBookingSuccess] = useState(false);
+  const [carFilter, setCarFilter] = useState<'All' | 'SUV' | 'Sedan' | 'Sport' | 'Business'>('All');
   
   const carsRef = useRef<HTMLDivElement>(null);
   const servicesRef = useRef<HTMLElement>(null);
@@ -277,11 +282,7 @@ export default function App() {
     { label: lang === 'AZ' ? 'İLLİK TƏCRÜBƏ' : 'YEARS EXP', value: '8', icon: <Trophy className="w-8 h-8 text-yellow-600" /> },
   ];
 
-  const cars = [
-    { id: 1, name: 'Mercedes-Benz S-Class', price: '450 AZN', img: 'https://images.unsplash.com/photo-1542362567-b052d007c0f1?q=80&w=2070&auto=format&fit=crop' },
-    { id: 2, name: 'Range Rover Vogue', price: '500 AZN', img: 'https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?q=80&w=2070&auto=format&fit=crop' },
-    { id: 3, name: 'Porsche Cayenne GTS', price: '600 AZN', img: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=2070' }
-  ];
+  const filteredCars = carFleet.filter(car => carFilter === 'All' || car.category === carFilter);
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white font-sans selection:bg-amber-500 selection:text-black">
@@ -451,18 +452,27 @@ export default function App() {
               <p className="text-amber-500 font-black tracking-[0.4em] uppercase text-[10px] mb-4">{t.fleet}</p>
               <h3 className="text-5xl md:text-7xl font-black tracking-tighter">{t.latestModels}</h3>
             </div>
-            <button className="mt-8 md:mt-0 flex items-center gap-3 text-zinc-400 hover:text-amber-500 transition-all group font-black uppercase tracking-widest text-xs">
-              {t.viewAll} <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </button>
+            <div className="flex flex-wrap gap-2 mt-8 md:mt-0">
+               {['All', 'SUV', 'Sedan', 'Sport', 'Business'].map((cat: any) => (
+                 <button 
+                  key={cat}
+                  onClick={() => setCarFilter(cat)}
+                  className={`px-6 py-3 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${carFilter === cat ? 'bg-amber-500 text-black' : 'bg-white/5 text-zinc-500 hover:text-white'}`}
+                 >
+                   {cat}
+                 </button>
+               ))}
+            </div>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
-            {cars.map((car, i) => (
+            {filteredCars.map((car, i) => (
               <motion.div 
-                key={i}
+                key={car.id}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
+                layout
                 transition={{ delay: i * 0.1 }}
                 className="group relative bg-[#111111] rounded-[40px] overflow-hidden border border-zinc-900 shadow-2xl"
               >
@@ -476,7 +486,7 @@ export default function App() {
                   <div className="absolute inset-0 bg-gradient-to-t from-[#111111] via-transparent to-transparent opacity-60" />
                   <div className="absolute top-6 right-6">
                     <span className="bg-amber-500/90 backdrop-blur-md text-black text-[10px] font-black px-4 py-2 rounded-full shadow-lg uppercase tracking-widest">
-                      {car.price}/Gün
+                      {car.price} AZN/Gün
                     </span>
                   </div>
                 </div>
@@ -485,11 +495,11 @@ export default function App() {
                   <div className="grid grid-cols-2 gap-4 mb-10">
                     <div className="flex items-center gap-3 text-zinc-500">
                       <Settings className="w-4 h-4 text-amber-500/50" />
-                      <span className="text-[11px] font-black uppercase tracking-widest">Avtomat</span>
+                      <span className="text-[11px] font-black uppercase tracking-widest">{car.specs.transmission}</span>
                     </div>
                     <div className="flex items-center gap-3 text-zinc-500">
-                      <RefreshCcw className="w-4 h-4 text-amber-500/50" />
-                      <span className="text-[11px] font-black uppercase tracking-widest">Benzin</span>
+                      <Users className="w-4 h-4 text-amber-500/50" />
+                      <span className="text-[11px] font-black uppercase tracking-widest">{car.specs.seats} Seats</span>
                     </div>
                   </div>
                   <button 
@@ -568,34 +578,13 @@ export default function App() {
             </h3>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
-            {satStats.map((stat, i) => (
-              <motion.div 
-                key={stat.label}
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="flex flex-col items-center text-center group"
-              >
-                <div className="w-28 h-28 rounded-[35%] border border-zinc-900 bg-zinc-900/20 flex items-center justify-center mb-10 group-hover:bg-amber-500 group-hover:border-amber-500 group-hover:scale-110 transition-all duration-700 shadow-2xl">
-                  <div className="group-hover:scale-110 transition-transform duration-500">
-                    {stat.icon && <span className="group-hover:text-black transition-colors">{stat.icon}</span>}
-                  </div>
-                </div>
-                <div className="text-5xl font-black mb-3 tracking-tighter group-hover:text-amber-500 transition-colors">
-                  <AnimatedCounter 
-                    end={parseFloat(stat.value.replace(/[^0-9.]/g, ''))} 
-                    suffix={stat.value.replace(/[0-9.]/g, '')} 
-                  />
-                </div>
-                {stat.sub && <div className="text-amber-500 mb-3 tracking-[0.4em] text-xs font-black">{stat.sub}</div>}
-                <div className="text-[10px] text-zinc-500 uppercase tracking-[0.4em] font-black group-hover:text-white transition-colors">
-                  {stat.label}
-                </div>
-              </motion.div>
-            ))}
+          <Testimonials />
+
+          <div className="mt-40 text-center mb-20">
+             <h3 className="text-4xl font-black tracking-tight mb-4 uppercase">{lang === 'AZ' ? 'Tez-tez verilən suallar' : 'FAQ'}</h3>
+             <p className="text-zinc-500 font-medium">Bütün suallarınıza cavab tapmaq üçün buradayıq.</p>
           </div>
+          <FAQ lang={lang} />
         </div>
       </section>
 
@@ -927,13 +916,13 @@ export default function App() {
                         <button className="text-amber-500 text-[10px] font-black uppercase tracking-widest border border-amber-500/20 px-4 py-2 rounded-full hover:bg-amber-500 hover:text-black transition-all">Add Car</button>
                       </div>
                       <div className="space-y-6">
-                        {cars.map((car) => (
+                        {carFleet.map((car) => (
                           <div key={car.id} className="flex items-center justify-between p-4 bg-zinc-900/40 rounded-3xl border border-white/5">
                             <div className="flex items-center gap-4">
                               <img src={car.img} className="w-12 h-12 rounded-xl object-cover" />
                               <div>
                                 <div className="text-sm font-black">{car.name}</div>
-                                <div className="text-[10px] text-zinc-500 uppercase tracking-widest">{car.price}</div>
+                                <div className="text-[10px] text-zinc-500 uppercase tracking-widest">{car.price} AZN</div>
                               </div>
                             </div>
                             <div className="flex gap-2">
@@ -955,6 +944,7 @@ export default function App() {
           </motion.div>
         )}
       </AnimatePresence>
+      <Chatbot lang={lang} />
     </div>
   );
 }
